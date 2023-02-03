@@ -1,6 +1,6 @@
-# Gradle + Groovy
+### Gradle + Groovy
 
-## Gradle
+# Gradle
 
 ### Introduction
 
@@ -65,3 +65,15 @@ jar {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
   }
   ```
+
+# **Groovy**
+
+- Built on top of Java to make the development process faster and easier with less boilerplate code
+- Purely Object Oriented
+
+```mermaid
+Graph LR
+A[Groovy Code] -> B[Byte Code]
+C[Java Code] -> B
+A -.->
+```
