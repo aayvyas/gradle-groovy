@@ -73,7 +73,7 @@ jar {
 
 ```mermaid
 flowchart LR
-A[Groovy Code] -> B[Byte Code]
-C[Java Code] -> B
+A[Groovy Code] --> B[Byte Code]
+C[Java Code] --> B
 A -.-> C
 ```
