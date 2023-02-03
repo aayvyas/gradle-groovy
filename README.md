@@ -75,5 +75,5 @@ jar {
 Graph LR
 A[Groovy Code] -> B[Byte Code]
 C[Java Code] -> B
-A -.->
+A -.-> C
 ```
