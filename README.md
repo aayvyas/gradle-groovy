@@ -72,7 +72,7 @@ jar {
 - Purely Object Oriented
 
 ```mermaid
-Graph LR
+flowchart LR
 A[Groovy Code] -> B[Byte Code]
 C[Java Code] -> B
 A -.-> C
