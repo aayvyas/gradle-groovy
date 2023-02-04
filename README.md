@@ -379,3 +379,111 @@ is loo-
 noww!
 '''
 ```
+
+### **Collections**
+
+## Range
+
+```groovy
+Range r = 1..10
+println r // [1,2,3.....,10]
+println(r.from , r.to) // 1 , 2
+
+// Exclude the last
+Range exclusionRange = 1..<10
+
+//Using range with dates
+Date today = new Date()
+Date oneWeekAway = today + 7
+
+Range days = today..oneWeekAway
+
+Range letters = 'a'..'z'
+
+```
+
+### Contains
+
+```groovy
+assert (0..10).contains(0)
+```
+
+## List
+
+```groovy
+def nums = [1,2,3,4]
+println nums.class.name // java.Util.ArrayList
+
+// Specifying what type of list it should be
+List ll = [1,2,3,4] as LinkedList
+
+// pushing
+ll.push(99)
+ll.putAt(0,77)
+ll[0] = 77
+
+
+// appending
+List appendedLists = ll + 3
+ll << 66 //left shift append
+
+//removing an item
+ll.pop()
+ll.removeAt(0)
+def newList = nums - 1 //removes 1
+
+
+// getAt()
+nums.getAt(0..3) // numbers from 0,1,2,3
+
+// flatten
+nums << [3,4,5]
+nums << [1,2]
+nums.flatten() // flattens the list of lists and make a big lists
+
+// unique
+nums.unique()  // Only unqiue items
+def numbers = [1,2,3,44,43,2,121,4] as Set
+def numbers = [1,2,3,44,5324,343,3] as SortedSet
+
+```
+
+## Maps
+
+```groovy
+
+LinkedHashMap map = [:]
+def person = [firstName:"sda", lastName:"ada", email:"eqwe@gmali.moc"]
+
+// accessing the values (get)
+person.firstName
+
+// setting the value (set)
+person.firstName = "NewName"
+
+def emailKey = "EmailAddress"
+// key will be emailKey not it's value
+def twitter = [username: "username", emailKey:"eqwe@gmali.moc"]
+// If you want the key to be the value of emailKey use parenthesis
+def twitter = [username: "username", (emailKey):"eqwe@gmali.moc"]
+
+// Sorting
+person.sort()
+
+// looping
+for (entry in person) {
+  println entry
+}
+for ( key in person.keySet() ){
+  println "$key:${person[key]}"
+}
+```
+
+## Enums
+
+```groovy
+
+enum Days {
+  SUNDAY, MONDAY, TUESDAY ...
+}
+```
