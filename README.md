@@ -1005,9 +1005,3 @@ a(Groovy) -."makes call".-> MOP("Meta Object Protocol") --"Takes Decision"--> b(
 a --> c(java)
 d(java) --makes call--> c
 ```
-
-```mermaid
-flowchart LR
-("groovy class") -->
-
-```
