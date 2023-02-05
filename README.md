@@ -761,3 +761,83 @@ writer.resolveStrategy = Closure.DELEGATE_FIRST
 // Specifying that look first that the delegate can handle the call or not.
 
 ```
+
+# **[Control Structures](https://groovy-lang.org/semantics.html#_control_structures)**
+
+## **Groovy Truth**
+
+| Runtime type     | Estimation criteria of groovy truth |
+| ---------------- | ----------------------------------- |
+| Boolean          | Boolean value                       |
+| Matcher          | Matcher has Match                   |
+| Collection       | Collection is non empty             |
+| Map              | Map is non empty                    |
+| String           | String is non empty                 |
+| Number Character | Number is non zero                  |
+
+## **Conditional Structures Advanced**
+
+### **Switch Statements on Steroids**
+
+```groovy
+def num = 3
+switch(num){
+case 1:
+  println "1"
+  break
+case 1..3: // if num in range 1 to 3
+  println "in range 1..3"
+  break
+case Integer:
+  println "It is an Integer"
+  break
+case [1,2,12]:
+  println "It is in list [1,2,12]"
+  break
+}
+```
+
+## **Exception Handling**
+
+- Optional
+- No need of method signatures for exception throwing
+
+```Java
+// Throwing an expression in Java with method signatures
+public void foo() throw Exception {
+  throw new Exception();
+}
+```
+
+Groovy Equivalent
+
+```groovy
+def foo() {
+  throw new Exception()
+}
+
+List logs = []
+
+try {
+  foo()
+}catch(Exception e) {
+  logs << e.message
+}finally{
+  println logs
+}
+```
+
+# **OOP with Groovy**
+
+### Basics
+
+```groovy
+class foo{
+  private String firstName // Specifying private
+  // groovy will not create default getters and setters for this variable
+
+  String firstName // By default private,
+  // groovy creates getters and setters for it
+}
+
+```
