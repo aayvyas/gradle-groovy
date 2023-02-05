@@ -487,3 +487,277 @@ enum Days {
   SUNDAY, MONDAY, TUESDAY ...
 }
 ```
+
+Advanced Groovy
+
+# **[Closures](https://groovy-lang.org/closures.html#:~:text=A%20closure%20in%20Groovy%20is,declared%20in%20its%20surrounding%20scope.)**
+
+`groovy.lang.Closures`
+
+anonymous block of code, takes parameters , performs actions and returns, can be assigned to a variable
+
+- It is an object.
+- Closures are used for :
+  - Iterators
+  - Callbacks
+  - Higher-order functions
+  - Specialized Control Structure
+  - Builders
+  - Resource Allocation
+  - Threads
+  - DSLs
+  - Fluent Interfaces
+
+## Creating a Closure
+
+```groovy
+def c = { }
+assert c instancof Closure
+
+def funcName = { param ->
+  // do something
+
+}
+
+// You can really pass this sayHello method to anywhere as it is an objects
+def sayHello = { name ->
+  println "Hello"
+}
+
+// each
+def nums = [1,2,3,4,5]
+// default
+nums.each({
+  println it
+})
+// named param
+nums.each({ num ->
+  println num
+})
+
+// [IMP]
+// Passing Closure as object & Last param
+def timesTen(num, closure){ // accepts an int and a closure
+  closure(num * 10)
+}
+
+// Passing the closure as object to a function call
+timesTen(2, { println it })
+
+// When the closure is the last param of a function/method
+// This is the special way of passing a closure to it
+timesTen(2) {
+  println it
+}
+
+// More uses
+10.times{
+  println it
+}
+import java.util.Random
+Random rand = new Random()
+3.times{
+  println rand.nextInt()
+}
+```
+
+## **Closure Parameters**
+
+```groovy
+
+// implicit parameters
+def foo = {
+  println it
+}
+
+foo("dan")
+
+// No Params
+def noParams  = {
+  println "no params"
+}
+noParams(1) // This will work
+// We need to explicitly define using an empty arrow
+def noParams  = { ->
+  println "no params"
+}
+noParams(1) // Will not work
+noParams() // Will work
+
+// Passing multiple parameters
+def multiParams = { first, last ->
+  println "Hello, $first $last"
+}
+
+// Restricting the type of passed parameter
+def resMultiParams = { String first, String last ->
+  println "Hello, $first $last"
+
+}
+
+// Default params
+def defaultParams = { String name, String greeting = "Hello" ->
+  println "$greeting", "$name"
+
+}
+
+// Variable args
+// Used when number of passed params are variable or not knows
+def variableArgs = { String... args ->
+  args.join(' ')
+}
+variableArgs('abc', 'def', 'cat') // output: 'abc def cat'
+
+// Some Important Properties of Closures
+def someMethod(Closure c){
+  // calling these on Closure object
+  println c.maximumNumberOfParameters
+  println c.parameterTypes
+}
+
+```
+
+## **Collections with Closures**
+
+### **each**
+
+```groovy
+
+// each & eachWithIndex
+List favNums = [12,323,3232323232, 232,23]
+// Normally each
+for(each in favNums){
+  println each
+}
+// Using Closures each
+favNums.each { println its}
+// WithIndex
+for(int i=0; i<favNums.size() ;i++){
+  println "$i $favNums[i]"
+}
+// Using Closures with eachWithIndex
+favNums.eachWithIndex { nums, index ->
+  println "$nums $index"
+}
+```
+
+### **findAll**
+
+```groovy
+
+List days = ["Sunday", "Monday" ....]
+// Using findAll and passing a closure for filterings
+List weekend = days.findAll{it.startsWith("S")}
+
+```
+
+### **Collect**
+
+```groovy
+List nums = [1,23,4,4,5,3]
+List numsTimesTen = []
+// Normal way , not efficient as we are iterating over the whole list
+nums.each{ num ->
+  numsTimeTen << num* 10
+}
+
+// using Collect
+List newTimesTen = nums.collect{ num -> num*10}
+```
+
+### **Curry Methods**
+
+makes a partial application, concept is it allows us to create a new closure based of an existing closure
+
+```groovy
+
+// A simple closure to print logs
+def log = { String type Date createdOn, String msg ->
+  println "$createdOn [$type] - $msg"
+}
+
+// Now if we want to call this multiple times we need to redundantly copy paste the whole statement
+log("DEBUG", new Date(), "This is my first debug statement...")
+log("DEBUG", new Date(), "This is my first debug statement 2...")
+log("DEBUG", new Date(), "This is my first debug statement 3...")
+log("DEBUG", new Date(), "This is my first debug statement 4...")
+
+// Using curry to create a debug log closure from an existing log closure
+def debugLog = log.curry("DEBUG") // returns the log closure with type parameter populated already
+debugLog(new Date(), "This is a debug log")
+
+// Create a today log with removing Date Parameter also
+def todaysDebugLog = log.curry("DEBUG", new Date())
+todaysDebugLog("This is today's DEBUG log statement")
+```
+
+#### rcurry (right curry)
+
+pass parameters from right to left to a curry
+
+```groovy
+// Right Most Parameter set here
+def crazyPersonLog = log.rcurry("Why Am I logging this way")
+crazyPersonLog("ERROR", newDate())
+```
+
+#### ncurry (index based curry)
+
+Index based
+
+```groovy
+// Setting a parameter at a particular index
+def typeMsgLog = log.ncurry(1, newDate())
+crazyPersonLog("ERROR", "This is the statement")
+```
+
+### **Closures and Delegates**
+
+**this** : corresponds to the enclosing class where the closure is defined
+
+**owner** : corresponds to the enclosing object where the closure is defined, which maybe either a class or closure
+
+**delegate** : corresponds to a third party object where methods calls or properties are resolved whenever the receiver of the message is not defined
+
+```groovy
+// example1
+class ScopeDemo{
+
+  def outerClosure = {
+    println this.class.name // ScopeDemo
+    println owner.class.name // ScopeDemo
+    println delegate.class.name // ScopeDemo
+
+    def nestedClosure = {
+      println this.class.name // ScopeDemo
+      println owner.class.name // ScopeDemo$_closure1 (outerClosure)
+      println delegate.class.name // ScopeDemo$_closure1 (outerClosure)
+    }
+    nestedClosure()
+  }
+}
+
+// example 2 : Changing delegate
+def writer = {
+  // use a method append as of this not defined
+  // without defining it will through an error
+  append 'dlo'
+  append 'Lise'
+}
+
+// Case #1 : Now the above function will work
+def append(String s) {
+  println "append() called with argument $s"
+}
+
+// Case #2 : Using another class object and assigning a delegate for it
+StringBuffer sb = new StringBuffer()
+writer.delegate = sb // we are delegating here so when the writer closure is called it will look for the append method in the delegated class.
+
+// Case #3 : If both is present a class object and a function defined
+// The function defined will take precedence before the delegate and will be called
+// To change the precedence you have to perform below actions, using resolveStrategy
+writer.resolveStrategy = Closure.DELEGATE_FIRST
+// Specifying that look first that the delegate can handle the call or not.
+
+```
