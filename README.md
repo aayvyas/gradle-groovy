@@ -841,3 +841,173 @@ class foo{
 }
 
 ```
+
+## **Constructors and Methods**
+
+```groovy
+@groovy.transform.ToString
+class Person{
+  String first, last
+
+  // explicit contructor
+  Person(String fullName){
+    List parts = fullName.split(' ')
+    first = parts[0]
+    last = parts[1]
+  }
+
+  // Methods
+  String getFullName(){
+    "$first $last"
+  }
+
+  // Return anything take anything
+  def func(param){
+    param + "Hello"
+  }
+
+}
+
+// Implicit Constructor, you can directly set variables using key:value
+Person person = new Person(first: "FirstName",last:"LastName")
+```
+
+### **Organizing Classes into Packages**
+
+```groovy
+package com.example.Application
+
+class Application {
+
+}
+```
+
+## **Inheritance**
+
+> function overiding and inheriting is same as Java
+
+```groovy
+class Phone {
+
+  String name
+  String os
+  String appStore
+
+  def powerOff(){
+
+  }
+
+  def powerOn(){
+
+  }
+
+}
+
+class AndroidPhone extends Phone {
+
+  @Override
+  def powerOn(){
+
+  }
+
+}
+
+
+AndroidPhone ap = new AndroidPhone(name: "Motorola Z", os: "Android Q", appStore: "Google Play Store")
+```
+
+## **Interfaces**
+
+> Same as Java
+
+```groovy
+interface IPersonService{
+  Person find()
+  List<Person> findAll()
+}
+
+class PersonService implements IPersonService{
+  @Override
+  Person find(){
+    // define the method body here
+  }
+  @Override
+  List<Person> findAll(){
+    // define the method body here
+  }
+}
+```
+
+## **Traits**
+
+> Equivalent to Java8 Default methods
+
+### Java8 Default Methods
+
+```Java
+public interface IPersonService{
+  // Providing default implementation to an interface method
+  default public void doSomething(){
+    System.out.println("Doing Something")
+  }
+}
+```
+
+### **Groovy Traits**
+
+> Interfaces without any contract nature until specified
+
+```groovy
+// Using the default method without need to override
+// and define it's implementationss
+class Bird implements FlyingAbility{
+  def foo(){
+    // do somethings
+  }
+}
+
+trait FlyingAbility{
+  String fly() {
+    "flying"
+  }
+
+  // this needs to be overrided as it is declared with
+  // abstract keyword
+  abstract def foo()
+}
+
+Bird b = new Bird()
+assert b.fly() == "flying" // true , this worked!
+```
+
+## **Groovy Bean**
+
+> A lot of boilerplat code like getters setters are no longer needed
+
+```groovy
+@ToString
+class Employee implements Serializable {
+  String firstName, lastName, emails
+}
+```
+
+# **Meta Programming**
+
+Writing of computer programs that writes and manipulates other programs
+
+## **(Runtime)**
+
+- When a method is called it is different in Groovy than Java, When the call happens Groovy looks into and intermediatary layer for MOP (Meta Object Protocol) for the particular action to be performed
+
+```mermaid
+flowchart TD
+a(Groovy) -."makes call".-> MOP("Meta Object Protocol") --"Takes Decision"--> b(Groovy)
+a --> c(java)
+d(java) --makes call--> c
+```
+
+```mermaid
+flowchart LR
+("groovy class") -->
+
+```
