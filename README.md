@@ -991,13 +991,17 @@ class Employee implements Serializable {
 }
 ```
 
-# **Meta Programming**
+# **[Meta Programming](https://www.google.com/search?q=Meta+programming&rlz=1C1GCEA_enIN1009IN1009&oq=Meta+programming+&aqs=chrome..69i57j0i10i512j0i512l3j0i10i512l2j0i512l2j0i10i512.5633j0j7&sourceid=chrome&ie=UTF-8)**
 
-Writing of computer programs that writes and manipulates other programs
+**Definition**: Writing of computer programs that writes and manipulates other programs
 
-## **(Runtime)**
+## **[(Runtime)](https://groovy-lang.org/metaprogramming.html#_runtime_metaprogramming)** : Change something when the program is running
 
 - When a method is called it is different in Groovy than Java, When the call happens Groovy looks into and intermediatary layer for MOP (Meta Object Protocol) for the particular action to be performed
+
+### **Meta Object Protocol**
+
+The MOP is a collection of rules of how a request for a method call is handled by the groovy runtime system and how to control the intermediate layer.
 
 ```mermaid
 flowchart TD
@@ -1005,3 +1009,302 @@ a(Groovy) -."makes call".-> MOP("Meta Object Protocol") --"Takes Decision"--> b(
 a --> c(java)
 d(java) --makes call--> c
 ```
+
+**POJO** : A regular Java Object, whose class can be written in Java or any other language for the JVM
+
+**POGO** : A Groovy object, whose class is written in Groovy. It extends java.lang.Object and implements the groovy.lang.GroovyObject interface by default.
+
+**Groovy Interceptor** : A Groovy object that implements the groov.lang.GroovyInterceptable interface and has method inteception capability.
+
+### **Customizing the MOP**
+
+#### **GroovyObject**
+
+```groovy
+
+class Employee {}
+```
+
+implements GroovyObject and extends JavaObject
+
+#### **InvokeMethod**
+
+You can intercept method call and decide which method to call when the particular method is called.
+
+```groovy
+// ! Wrong
+class InvokeDemo{
+
+  def test() {
+    return "method exists"
+  }
+
+}
+
+def invokeDemo = new InvokeDemo()
+assert invokeDemo.test() == 'method exists'
+// Trying to call a method that Do not exists
+assert invokeDemo.someMethod() == 'Called invokeMethod someMethod []' // Throws error
+
+// ! Right
+class InvokeDemo{
+  // Using invokeMethod to handle method not exists
+  def invokeMethod(String name, Object args){
+    return "Called invokeMethod $name $args"
+  }
+  def test() {
+    return "method exists"
+  }
+
+}
+
+def invokeDemo = new InvokeDemo()
+assert invokeDemo.test() == 'method exists'
+// Now if you call this method, it still does not exists but it won't throw error
+// It will get handled by invokeMethod
+assert invokeDemo.someMethod() == 'Called invokeMethod someMethod []'
+```
+
+#### **getProperty**
+
+Every read access to a property can be intercepted by overriding the getProperty() method of the current object.
+
+```groovy
+class PropertyDemo{
+  def prop1 = "prop1"
+  def prop2 = "prop2"
+  def prop3 = "prop3"
+
+
+  // intercepting and manipulating the default behaviour of getter
+  def getProperty(String name){
+    // this will run smoothly irrespective of property existence
+    println "getProperty() called with property $name"
+
+    if(metaClass.hasProperty(this,name)){
+      // return the actual value
+      return metaClass.getProperty(this, name)
+    }else{
+      return "This property doesnot exists"
+    }
+  }
+}
+
+def pd = new PropertyDemo()
+
+println pd.prop1
+println pd.prop2
+println pd.prop3
+
+// This property doesnot exists but we are trying to call it.
+println pd.prop4 // It will not through an error
+```
+
+#### **propertyMissing**
+
+Previous way of working with missing properties was not efficient, below is the better way to do it.
+
+```groovy
+class foo{
+  def propertyMissing(String name){
+    "Caught missing property: $name"
+  }
+}
+
+// Trying to call a method that doesnot exists
+println new Foo().bar()
+
+```
+
+#### **setProperty**
+
+You can intercept and override the getter, same can be done with setter.
+
+```groovy
+class POGO{
+  String property
+
+  // mainpulates the setter
+  void setProperty(String name, Object value){
+    this.@"$name" = "overriden by setProperty"
+  }
+}
+
+def pogo = new POGO()
+pogo.property = 'a'
+
+assert pogo.property == 'a' // fails
+
+```
+
+#### **methodMissing**
+
+InvokeMethod but specifically for missing methods, Here we can only take actions for the method calls of our interest and more.
+
+```groovy
+class MyEmployee{
+  def methodMissing(String name, def args){
+    if(name != "someMethod"){
+      throw new MissingMethodException("${name} method doesnot exists")
+    }
+    println "Method Missing ccalled on: $name"
+    println "With Arguments ${args}"
+  }
+}
+
+MyEmployee emp = new MyEmployee()
+emp.someMethod(1,2,3)
+emp.someOtherMethod()
+
+```
+
+## MetaClass
+
+Part of GroovyObject interface
+
+Every single class has a MetaClass associated to it, and for making things dynammic you can add method and properties to this MetaClass without affecting the actual class.
+
+```mermaid
+flowchart LR
+Class ----> MetaClass
+
+  subgraph Meta
+  Methods -.-> MetaClass
+  Properties -.-> MetaClass
+  end
+```
+
+### **Expando**
+
+We can add a property or method to an instance of expando class.
+
+```groovy
+Expando expando = new Expando()
+expando.firstName = 'Aayush'
+expando.lastName = 'Vyas'
+expando.fullName = { "$firstName $lastName" }
+
+Expando anotherExpando = new Expando()
+anotherExpando.fullName() // Will throw an error
+// The above actions are limited to just that instance.
+```
+
+### **Making our class Expando (Not Actually)**
+
+Trying to mimic the same behaviour as we did above with our class.
+
+```groovy
+Developer newDev = new Developer()
+newDev.name = "Aayush"
+newDev.role = "ple"
+newDev.Introduce = {println "Hi! I am $name, I joind the team as a $role."}
+
+newDev.Introduce()
+```
+
+Above Code won't work, because our class is not Expando.
+We don't have to make our class expando, or do anything at all with our class.
+
+We can make changes to properties and methods of our class using the MetaClass
+
+> This change will be on a per instance basis
+
+```groovy
+Developer newDev = new Developer()
+newDev.metaClass.name = "Aayush"
+newDev.metaClass.role = "ple"
+newDev.metaClass.Introduce = {println "Hi! I am $name, I joined the team as a $role."}
+
+newDev.Introduce()
+```
+
+> every instance
+
+```groovy
+String.metaclass.shout = { -> toUpperCase() }
+println "hello".shout() // HELLO
+```
+
+## **Categories**
+
+Not so application wide way of adding methods and properties
+
+```groovy
+// Not a great idea to do this
+String.metaclass.shout = { -> toUpperCase() }
+println "hello".shout() // HELLO
+```
+
+Categories allowed us to create a confined space and only allows us to intercept and play with them.
+
+```groovy
+// filename: StringCategory
+class StringCategory{
+  static String shout(String str){
+    str.toUpperCase()
+  }
+}
+
+//different file
+// using the CategoryClass
+use(StringCategory){
+  // Now the methods from the StringCategory class can be
+  // only used within this confined space.
+  println "Hello, World!".shout() // HELLO WORLD!
+}
+
+println "Hello, World!".shout() // No method found error
+```
+
+```groovy
+// Using built-in Categories
+use(TimeCategory){
+  println 1.minute.from.now
+  println 10.hours.ago
+}
+```
+
+## **(Compile Time)**
+
+AST transformations
+
+- @ToString
+
+  ```groovy
+  // There are many more properties that you can configure acc to your use case
+  @ToString(includeNames=true,excludes= ["email"])
+  class Customer{
+    String name
+  }
+  ```
+
+- @EqualsAndHashCode
+
+  ```groovy
+  @EqualsAndHashCode
+  class Customer{
+    String name
+  }
+
+  Customer c1 = new Customer()
+  Customer c2 = new Customer()
+  assert c1 == c2
+
+  ```
+
+- @TupleConstructor
+
+  ```groovy
+
+  @TupleConstructor
+  class Customer{
+    String firstName
+    String lastName
+    String email
+
+  }
+
+  // passing all the parameters as tuples
+  // no need of name params ex: firstName : "Aayush"
+  Customer c = new Customer("Aayush", "Vyas", "aayushvyas@mail.com")
+  ```
