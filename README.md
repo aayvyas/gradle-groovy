@@ -1308,3 +1308,195 @@ AST transformations
   // no need of name params ex: firstName : "Aayush"
   Customer c = new Customer("Aayush", "Vyas", "aayushvyas@mail.com")
   ```
+
+- @Canonical
+
+  Combination for previous three AST transformations in one
+
+- @Singleton
+
+  Only single instance of this class can exist
+
+  ```groovy
+  @Singleton
+  class DatabaseConnection{
+
+  }
+
+  DatabaseConnection db = DatabaseConnection.instance
+  println db
+  ```
+
+- @Sortable
+  Sorting objects or Classes easy.
+  No need to write a comparator method.
+
+  ```groovy
+  // This will Sort the Person objects based on their first and last names (if nothing mentioned)
+  @Cannonical
+  @Sortable
+  class Person{
+    String first
+    String last
+  }
+
+  Person p1 = new Person("Aayush", "Vyas")
+  Person p2 = new Person("Yayush", "Ayas")
+  Person p3 = new Person("Xayush", "Lyas")
+  Person p4 = new Person("Cayush", "Vyas")
+
+  List l = [p1,p2,p3,p4]
+  List sortedList = l.toSorted()
+
+  @Cannonical
+  // sort on basis of last, if equal use first
+  @Sortable( includes = ['last', 'first'])
+  class Person{
+    String first
+    String last
+  }
+
+  ```
+
+- @Immutable
+  Once the instance has been created you won't be able to change it's state.
+
+  > Making things final!
+
+  ```groovy
+  @Immutable
+  class Person{
+
+  }
+  ```
+
+- @TypeChecked
+  To improve Lack of compileTime checking
+  Strong checking at the time of compiling
+
+  ```groovy
+  @TypeChecked
+  class Person{
+    String firstName
+    String lastName
+    String getFullName() {
+      "$firstname $lastname" // Without @TypeChecked it won't get
+      // detected here, but now it will show error.
+    }
+  }
+  ```
+
+- @CompileStatic
+  use compile time checks same as Java (Static) , bypassing the MOP (Meta Object Protocol)
+
+  ```groovy
+  @CompileStatic // class level
+  class someClass {
+    String foo(){
+
+    }
+    String bar(){
+
+    }
+    @CompileStatic(TypeCheckingMode.SKIP)
+    void noReturn(){
+
+    }
+  }
+  ```
+
+- @Builders
+
+  - Helps you create objects in a better way
+  - It has multiple strategies
+
+  ```groovy
+  @Builder
+  @ToString
+  class Developer {
+    // bunch of properties
+  }
+
+  Developer d = Developer
+                .builder()
+                .firstName("Aayush")
+                .lastName("Vyas")
+                .middleInitial("B")
+                .email("aayvyas@gmail.com")
+                .build()
+
+  println d
+  ```
+
+# **Builders**
+
+Conveniently instanstiate and use objects
+
+> Documentation for builders is not very good, if you want to find more use cases look for unit tests on github groovy.
+
+## Markup Builder XML
+
+creates a markup
+
+```groovy
+MarkupBuilder builder = new MarkupBuilder()
+builder.omitEmptyAttributes = true
+builder.omitNullAttributes = true
+
+builder.sports{
+  sport(id: 1){
+    name 'Baseball'
+  }
+  sport(id: 2){
+    name 'BasketBall'
+  }
+  sport(id: 3){
+    name 'Footbal'
+  }
+  sport(id: 4){
+    name 'Hockey'
+  }
+  sport(id: null foo:''){
+    name ''
+  }
+}
+
+```
+
+## Markup Builder HTML
+
+> You can use looping and .each method to create dynamic structures
+
+```groovy
+// creating a writer and passing it to the builder
+FileWriter writer = new FileWriter('html/about.html')
+// builder will use the writer to write to a file
+MarkupBuilder builder = new MarkupBuilder(writer)
+builder.omitEmptyAttributes = true
+builder.omitNullAttributes = true
+
+builder.html{
+  head{
+    title 'title'
+    description 'description'
+  }
+  body{
+    h1 'This is a heading'
+    p 'This is a paragraph'
+    table {
+      tr {
+        th 'id'
+        th 'name'
+      }
+      tr {
+        th '1'
+        th 'Groovy'
+      }
+      tr {
+        th '2'
+        th 'java'
+      }
+    }
+  }
+}
+```
